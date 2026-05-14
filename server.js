@@ -1,9 +1,13 @@
 const express = require('express');
 const sql = require('mssql');
+
 const cors = require('cors');
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: '*' // permite cualquier origen por ahora
+}));
+
 app.use(express.json());
 
 // const config = {
@@ -42,6 +46,9 @@ const config = {
 //     trustServerCertificate: true
 //   }
 // };
+
+
+
 
 // Prueba de conexión
 app.get('/api/ping', async (req, res) => {
