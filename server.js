@@ -23,7 +23,7 @@ app.use(express.json());
 // };
 
 
-//configuracion para conexion con render
+// configuracion para conexion con render
 const config = {
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
@@ -374,7 +374,19 @@ app.get('/api/pagos', async (req, res) => {
 });
 
 
-
-
+// obtener ordenes de un cliente específico (logeado)
+// ══ OBTENER ÓRDENES FILTRADAS POR CLIENTE ══
+app.get('/api/ordenes/cliente/:id', async (req, res) => {
+  try {
+    await sql.connect(config);
+    const result = await sql.query`
+      SELECT * FROM Ordenes 
+      WHERE IdCliente = ${req.params.id} 
+      ORDER BY IdOrden DESC`;
+    res.json(result.recordset);
+  } catch (err) { 
+    res.status(500).json({ error: err.message }); 
+  }
+});
 
 app.listen(3000, () => console.log('Servidor corriendo en http://localhost:3000'));
