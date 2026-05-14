@@ -24,30 +24,28 @@ app.use(express.json());
 
 
 //configuracion para conexion con render
-// const config = {
-//   user: process.env.DB_USER,
-//   password: process.env.DB_PASSWORD,
-//   server: process.env.DB_SERVER,
-//   database: process.env.DB_NAME,
-//   options: {
-//     encrypt: true,           
-//     trustServerCertificate: false
-//   }
-// }
-
 const config = {
-  server: '127.0.0.1',
-  port: 1433,
-  database: 'TallerV1',
-  user: 'destruc16x',
-  password: 'Bg1234',
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  server: process.env.DB_SERVER,
+  database: process.env.DB_NAME,
   options: {
-    //trustedConnection: true,
-    trustServerCertificate: true
+    encrypt: true,           
+    trustServerCertificate: false
   }
-};
+}
 
-
+// const config = {
+//   server: '127.0.0.1',
+//   port: 1433,
+//   database: 'TallerV1',
+//   user: 'destruc16x',
+//   password: 'Bg1234',
+//   options: {
+//     //trustedConnection: true,
+//     trustServerCertificate: true
+//   }
+// };
 
 
 // Prueba de conexión
