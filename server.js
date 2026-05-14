@@ -24,28 +24,28 @@ app.use(express.json());
 
 
 //configuracion para conexion con render
-const config = {
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  server: process.env.DB_SERVER,
-  database: process.env.DB_NAME,
-  options: {
-    encrypt: true,           
-    trustServerCertificate: false
-  }
-}
-
 // const config = {
-//   server: '127.0.0.1',
-//   port: 1433,
-//   database: 'TallerV1',
-//   user: 'destruc16x',
-//   password: 'Bg1234',
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASSWORD,
+//   server: process.env.DB_SERVER,
+//   database: process.env.DB_NAME,
 //   options: {
-//     //trustedConnection: true,
-//     trustServerCertificate: true
+//     encrypt: true,           
+//     trustServerCertificate: false
 //   }
-// };
+// }
+
+const config = {
+  server: '127.0.0.1',
+  port: 1433,
+  database: 'TallerV1',
+  user: 'destruc16x',
+  password: 'Bg1234',
+  options: {
+    //trustedConnection: true,
+    trustServerCertificate: true
+  }
+};
 
 
 
@@ -87,6 +87,7 @@ app.post('/api/login', async (req, res) => {
 });
 
 // ══ REGISTER ══
+
 app.post('/api/register', async (req, res) => {
   const { nombre, telefono, correo, direccion, username, password } = req.body;
   try {
@@ -96,18 +97,6 @@ app.post('/api/register', async (req, res) => {
     if (existe.recordset.length > 0)
       return res.status(400).json({ ok: false, error: 'Ese username ya existe' });
 
-
-    //cambio nuevo
-    //   const uResult = await sql.query`
-    //   DECLARE @resultado TABLE (IdUsuario INT);
-    //   INSERT INTO Usuarios (Username, Password, IdRol, Activo)
-    //   OUTPUT INSERTED.IdUsuario INTO @resultado
-    //   VALUES (${username}, ${password}, 3, 1);
-    //   SELECT IdUsuario FROM @resultado;
-    // `;
-    // const idUsuario = uResult.recordset[0].IdUsuario;
-
-    //Insertar en Usuarios y obtener el IdUsuario generado
     const uResult = await sql.query`
       INSERT INTO Usuarios (Username, Password, IdRol, Activo)
       OUTPUT INSERTED.IdUsuario
@@ -120,6 +109,43 @@ app.post('/api/register', async (req, res) => {
     res.json({ ok: true });
   } catch (err) { res.status(500).json({ ok: false, error: err.message }); }
 });
+
+//nuevo endpoint para registrar solo cliente  (login - dashboard)
+
+app.post('/api/nuevo-cliente', async (req, res) => {
+
+  const { Nombre, Telefono, Correo, Direccion, Username, Password, IdRol } = req.body;
+
+  try {
+    await sql.connect(config);
+
+
+    const existe = await sql.query`SELECT IdUsuario FROM Usuarios WHERE Username = ${Username}`;
+    if (existe.recordset.length > 0) {
+      return res.status(400).json({ ok: false, error: 'El nombre de usuario ya existe' });
+    }
+
+
+    const uResult = await sql.query`
+      INSERT INTO Usuarios (Username, Password, IdRol, Activo)
+      OUTPUT INSERTED.IdUsuario
+      VALUES (${Username}, ${Password}, ${IdRol}, 1)`;
+    
+    const idUsuario = uResult.recordset[0].IdUsuario;
+
+
+    await sql.query`
+      INSERT INTO Clientes (IdUsuario, Nombre, Telefono, Correo, Direccion)
+      VALUES (${idUsuario}, ${Nombre}, ${Telefono}, ${Correo}, ${Direccion})`;
+
+    res.json({ ok: true, mensaje: 'Registro completado con éxito' });
+
+  } catch (err) {
+    console.error("Error en registro:", err.message);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 
 // ══ ROLES ══
 app.get('/api/roles', async (req, res) => {
@@ -348,6 +374,8 @@ app.get('/api/pagos', async (req, res) => {
     res.json(result.recordset);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
+
+
 
 
 
